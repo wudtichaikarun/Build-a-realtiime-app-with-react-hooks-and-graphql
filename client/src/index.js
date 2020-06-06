@@ -18,7 +18,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import * as serviceWorker from "./serviceWorker";
 
 const wsLink = new WebSocketLink({
-  uri: "ws://localhost:4000/graphql",
+  uri: "wss://graphql-geopins.herokuapp.com/graphql",
   options: {
     reconnect: true,
   },

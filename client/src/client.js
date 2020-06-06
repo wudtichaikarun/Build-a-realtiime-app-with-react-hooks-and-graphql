@@ -3,8 +3,8 @@ import { GraphQLClient } from "graphql-request";
 
 export const BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "production_url"
-    : "http://localhost:4000/graphql";
+    ? "https://graphql-geopins.herokuapp.com/graphql"
+    : "https://graphql-geopins.herokuapp.com/graphql";
 
 export const useClient = () => {
   const [idToken, setIdToken] = useState("");

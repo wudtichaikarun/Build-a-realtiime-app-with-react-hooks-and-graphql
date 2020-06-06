@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from "react";
 import ReactMapGL, { NavigationControl, Marker, Popup } from "react-map-gl";
 import { withStyles } from "@material-ui/core/styles";
 import differenceInMinutes from "date-fns/difference_in_minutes";
+import { Subscription } from "react-apollo";
 import PinIcon from "./PinIcon";
 import Context from "../context";
 import Blog from "./Blog";
 import { useClient } from "../client";
 import { GET_PINS_QUERY } from "../graphql/queries";
+import { PIN_ADDED_SUBSCRIPTION } from "../graphql/subscriptions";
 import { Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
@@ -160,6 +162,16 @@ const Map = ({ classes }) => {
           </Popup>
         )}
       </ReactMapGL>
+
+      {/* Subscription for Creating / Updating / Deleting Pins */}
+      <Subscription
+        subscription={PIN_ADDED_SUBSCRIPTION}
+        onSubscriptionData={({ subscriptionData }) => {
+          const { pinAdded } = subscriptionData.data;
+          console.log("pinAdded sub", pinAdded);
+          dispatch({ type: "CREATE_PIN", payload: pinAdded });
+        }}
+      />
 
       {/* Blog area to add pin content */}
       <Blog />

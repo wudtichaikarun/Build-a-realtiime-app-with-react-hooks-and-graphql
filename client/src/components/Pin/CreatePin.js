@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import axios from "axios";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
@@ -8,16 +9,52 @@ import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
 import ClearIcon from "@material-ui/icons/Clear";
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Context from "../../context";
+import { CREATE_PIN_MUTATION } from "../../graphql/mutations";
+import { useClient } from "../../client";
 
 const CreatePin = ({ classes }) => {
-  const { dispatch } = useContext(Context);
+  const client = useClient();
+  const { state, dispatch } = useContext(Context);
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
   const [content, setContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log({ title, image, content });
+  const handleImageUpload = async () => {
+    const data = new FormData();
+    data.append("file", image);
+    data.append("upload_preset", "geopins");
+    data.append("cloud_name", "dpgug3nu1");
+
+    const response = await axios.post(
+      "https://api.cloudinary.com/v1_1/dpgug3nu1/image/upload",
+      data
+    );
+
+    return response.data.url;
+  };
+
+  const handleSubmit = async (event) => {
+    try {
+      event.preventDefault();
+      setSubmitting(true);
+
+      const url = await handleImageUpload(image);
+
+      const { latitude, longitude } = state.draft;
+      const variables = { title, image: url, content, latitude, longitude };
+      const { createPin } = await client.request(
+        CREATE_PIN_MUTATION,
+        variables
+      );
+
+      console.log({ createPin });
+      handleDeleteDraft();
+      dispatch({ type: "CREATE_PIN", payload: createPin });
+    } catch (error) {
+      setSubmitting(false);
+      console.error("Error creating pin", error);
+    }
   };
 
   const handleDeleteDraft = () => {
@@ -88,7 +125,7 @@ const CreatePin = ({ classes }) => {
           className={classes.button}
           variant="contained"
           color="primary"
-          disabled={!title.trim() || !content.trim() || !image}
+          disabled={!title.trim() || !content.trim() || !image || submitting}
           onClick={handleSubmit}
         >
           <SaveIcon className={classes.rightIcon} />

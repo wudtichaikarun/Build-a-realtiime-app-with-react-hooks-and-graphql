@@ -8,7 +8,7 @@ module.exports = gql`
     picture: String
   }
 
-  type Pid {
+  type Pin {
     _id: ID
     createdAt: String
     title: String
@@ -26,7 +26,20 @@ module.exports = gql`
     author: User
   }
 
+  input CratePinInput {
+    title: String
+    image: String
+    content: String
+    latitude: Float
+    longitude: Float
+  }
+
   type Query {
     me: User
+    getPins: [Pin!]
+  }
+
+  type Mutation {
+    createPin(input: CratePinInput!): Pin
   }
 `;
